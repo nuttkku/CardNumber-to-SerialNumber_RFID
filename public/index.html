@@ -1,34 +1,57 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RFID Translator</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
-        input, button { font-size: 16px; padding: 5px; }
-        #result { margin-top: 20px; font-weight: bold; }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .conversion-section { margin-bottom: 30px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        h2 { margin-top: 0; }
+        input, button { font-size: 16px; padding: 5px; margin: 5px 0; }
+        .result { margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
     <h1>RFID Translator</h1>
-    <p>แปลงรหัสบัตร RFID เป็นซีเรียลนัมเบอร์</p>
-    <input type="text" id="inputValue" placeholder="ป้อน Card ID">
-    <button onclick="convertCardId()">แปลง</button>
-    <div id="result"></div>
+    
+    <div class="conversion-section">
+        <h2>Convert Card ID to Serial Number</h2>
+        <input type="text" id="cardIdInput" placeholder="Enter Card ID (10 digits)">
+        <button onclick="convert('toSerial')">Convert</button>
+        <div id="serialResult" class="result"></div>
+    </div>
+
+    <div class="conversion-section">
+        <h2>Convert Serial Number to Card ID</h2>
+        <input type="text" id="serialInput" placeholder="Enter Serial Number (8 hex digits)">
+        <button onclick="convert('toCardId')">Convert</button>
+        <div id="cardIdResult" class="result"></div>
+    </div>
 
     <script>
-        async function convertCardId() {
-            const input = document.getElementById('inputValue').value;
-            const response = await fetch('/convert', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ input: input }),
-            });
-            const data = await response.json();
-            document.getElementById('result').textContent = `ซีเรียลนัมเบอร์: ${data.result}`;
+        async function convert(direction) {
+            const inputId = direction === 'toSerial' ? 'cardIdInput' : 'serialInput';
+            const resultId = direction === 'toSerial' ? 'serialResult' : 'cardIdResult';
+            const input = document.getElementById(inputId).value;
+
+            try {
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ input, direction }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById(resultId).textContent = `Result: ${data.result}`;
+                } else {
+                    document.getElementById(resultId).textContent = `Error: ${data.error}`;
+                }
+            } catch (error) {
+                document.getElementById(resultId).textContent = 'Error: Could not connect to server';
+            }
         }
     </script>
 </body>
