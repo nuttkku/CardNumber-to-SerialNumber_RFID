@@ -6,18 +6,19 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.post('/convert', (req, res) => {
-    const inputValue = parseInt(req.body.input);
-    const hexValue = inputValue.toString(16).toUpperCase();
-    const rearranged = rearrangeHex(hexValue);
-    res.json({ result: rearranged });
+    const cardId = req.body.input;
+    const serialNumber = convertToSerialNumber(cardId);
+    res.json({ result: serialNumber });
 });
 
-function rearrangeHex(hex) {
-    // Pad the hex string to ensure it's 8 characters long
-    hex = hex.padStart(8, '0');
-    return hex.substr(6, 2) + hex.substr(4, 2) + hex.substr(2, 2) + hex.substr(0, 2);
+function convertToSerialNumber(cardId) {
+    // ตรรกะการแปลง Card ID เป็น Serial number
+    // นี่เป็นเพียงตัวอย่าง คุณอาจต้องปรับเปลี่ยนตามลอจิกจริงของระบบ RFID ของคุณ
+    const decimal = parseInt(cardId, 16);
+    const serialNumber = decimal.toString(16).toUpperCase().padStart(8, '0');
+    return serialNumber.substr(6, 2) + serialNumber.substr(4, 2) + serialNumber.substr(2, 2) + serialNumber.substr(0, 2);
 }
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`RFID Translator running at http://localhost:${port}`);
 });
